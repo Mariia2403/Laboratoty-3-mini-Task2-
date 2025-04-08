@@ -1,17 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace WpfApp2
 {
@@ -39,38 +28,64 @@ namespace WpfApp2
 
             for (int i = from; i <= to; i += step)
             {
-                int number = i; // створюємо копію для замикання в лямбді
-                var btn = new Button
+                int number = i;
+                var (isPrime, explanation) = CheckPrimeWithReason(number);
+
+                var btn = new ExplainedButton
                 {
                     Content = number.ToString(),
+                    Explanation = explanation,
                     Margin = new Thickness(5),
                     Padding = new Thickness(10, 5, 10, 5)
                 };
 
-                btn.Click += (s, _) =>
-                {
-                    string result = IsPrime(number) ? "Просте число" : "Складене число";
-                    MessageBox.Show($"{number}: {result}");
-                };
+                btn.Click += ExplainedButton_Click;
 
                 ButtonsPanel.Children.Add(btn);
             }
         }
 
-        private bool IsPrime(int number)
+        private void ExplainedButton_Click(object sender, RoutedEventArgs e)
         {
-            if (number < 2) return false;
-            if (number == 2) return true;
-            if (number % 2 == 0) return false;
+            if (sender is ExplainedButton btn)
+            {
+                string message;
+
+                if (btn.WasClicked)
+                {
+                   
+                    message = $"Ви вже натискали на цю кнопку.\n{btn.Explanation}";
+                }
+                else
+                {
+                  
+                    message = btn.Explanation;
+                    btn.WasClicked = true;
+                }
+
+                MessageBox.Show(message);
+            }
+        }
+
+        private (bool isPrime, string explanation) CheckPrimeWithReason(int number)
+        {
+            if (number < 2)
+                return (false, $"Число {number} не є простим (менше ніж 2)");
+
+            if (number == 2)
+                return (true, $"Число {number} є простим (ділиться лише на 1 і {number})");
+
+            if (number % 2 == 0)
+                return (false, $"Число {number} складене, бо ділиться на 2");
 
             int sqrt = (int)Math.Sqrt(number);
             for (int i = 3; i <= sqrt; i += 2)
             {
                 if (number % i == 0)
-                    return false;
+                    return (false, $"Число {number} складене, бо ділиться на {i}");
             }
 
-            return true;
+            return (true, $"Число {number} є простим, не ділиться ні на яке число, крім 1 і самого себе");
         }
     }
 }
