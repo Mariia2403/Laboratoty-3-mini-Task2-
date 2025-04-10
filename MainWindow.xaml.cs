@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -97,6 +98,37 @@ namespace WpfApp2
             }
 
             return (true, $"Число {number} є простим, не ділиться ні на яке число, крім 1 і самого себе");
+        }
+
+        private void RemoveMultiples_Click(object sender, RoutedEventArgs e)
+        {
+            if (!int.TryParse(MultipleTextBox.Text, out int multiple) || multiple == 0)
+            {
+                MessageBox.Show("Введіть коректне число (не нуль).");
+                return;
+            }
+
+            List<ExplainedButton> toRemove = new List<ExplainedButton>();
+
+            foreach (var child in ButtonsPanel.Children)
+            {
+                if (child is ExplainedButton btn &&
+                    int.TryParse(btn.Content.ToString(), out int value) &&
+                    value % multiple == 0)
+                {
+                    toRemove.Add(btn);
+                }
+            }
+
+            foreach (var btn in toRemove)
+            {
+                ButtonsPanel.Children.Remove(btn);
+            }
+
+            if (toRemove.Count == 0)
+            {
+                MessageBox.Show($"Жодної кнопки, кратної {multiple}, не знайдено.");
+            }
         }
     }
 }
