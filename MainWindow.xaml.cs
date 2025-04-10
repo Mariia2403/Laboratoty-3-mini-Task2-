@@ -13,6 +13,7 @@ namespace WpfApp2
         {
             InitializeComponent();
         }
+        private const int MAX_BUTTONS = 1000;
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -26,6 +27,15 @@ namespace WpfApp2
                 return;
             }
 
+            // 💡 Перевірка ліміту перед обробкою
+            int count = ((to - from) / step) + 1;
+            if (count > MAX_BUTTONS)
+            {
+                MessageBox.Show($"Занадто багато чисел для обробки ({count}). Максимум: {MAX_BUTTONS}.\n" +
+                                $"Зменшіть діапазон або збільшіть крок.");
+                return;
+            }
+
             for (int i = from; i <= to; i += step)
             {
                 int number = i;
@@ -36,7 +46,8 @@ namespace WpfApp2
                     Content = number.ToString(),
                     Explanation = explanation,
                     Margin = new Thickness(5),
-                    Padding = new Thickness(10, 5, 10, 5)
+                    Padding = new Thickness(10, 5, 10, 5),
+                    WasClicked = false
                 };
 
                 btn.Click += ExplainedButton_Click;
