@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace WpfApp2
 {
@@ -18,7 +19,7 @@ namespace WpfApp2
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            ButtonsPanel.Children.Clear();
+            //ButtonsPanel.Children.Clear();
 
             if (!int.TryParse(FromTextBox.Text, out int from) ||
                 !int.TryParse(ToTextBox.Text, out int to) ||
@@ -28,7 +29,7 @@ namespace WpfApp2
                 return;
             }
 
-            // 💡 Перевірка ліміту перед обробкою
+            //  Перевірка ліміту перед обробкою
             int count = ((to - from) / step) + 1;
             if (count > MAX_BUTTONS)
             {
@@ -40,7 +41,9 @@ namespace WpfApp2
             for (int i = from; i <= to; i += step)
             {
                 int number = i;
-                var (isPrime, explanation) = CheckPrimeWithReason(number);
+                var result = CheckPrimeWithReason(number);
+                bool isPrime = result.IsPrime;
+                string explanation = result.Explanation;
 
                 var btn = new ExplainedButton
                 {
@@ -73,31 +76,54 @@ namespace WpfApp2
                   
                     message = btn.Explanation;
                     btn.WasClicked = true;
+
+                   
+                    btn.Background = new SolidColorBrush(Colors.Violet);
                 }
 
                 MessageBox.Show(message);
             }
         }
 
-        private (bool isPrime, string explanation) CheckPrimeWithReason(int number)
+        private PrimeCheckResult CheckPrimeWithReason(int number)
         {
             if (number < 2)
-                return (false, $"Число {number} не є простим (менше ніж 2)");
+                return new PrimeCheckResult
+                {
+                    IsPrime = false,
+                    Explanation = $"Число {number} не є простим (менше ніж 2)"
+                };
 
             if (number == 2)
-                return (true, $"Число {number} є простим (ділиться лише на 1 і {number})");
+                return new PrimeCheckResult
+                {
+                    IsPrime = true,
+                    Explanation = $"Число {number} є простим (ділиться лише на 1 і {number})"
+                };
 
             if (number % 2 == 0)
-                return (false, $"Число {number} складене, бо ділиться на 2");
+                return new PrimeCheckResult
+                {
+                    IsPrime = false,
+                    Explanation = $"Число {number} складене, бо ділиться на 2"
+                };
 
             int sqrt = (int)Math.Sqrt(number);
             for (int i = 3; i <= sqrt; i += 2)
             {
                 if (number % i == 0)
-                    return (false, $"Число {number} складене, бо ділиться на {i}");
+                    return new PrimeCheckResult
+                    {
+                        IsPrime = false,
+                        Explanation = $"Число {number} складене, бо ділиться на {i}"
+                    };
             }
 
-            return (true, $"Число {number} є простим, не ділиться ні на яке число, крім 1 і самого себе");
+            return new PrimeCheckResult
+            {
+                IsPrime = true,
+                Explanation = $"Число {number} є простим, не ділиться ні на яке число, крім 1 і самого себе"
+            };
         }
 
         private void RemoveMultiples_Click(object sender, RoutedEventArgs e)
