@@ -20,7 +20,9 @@
 
         <TextBlock Text="До" Margin=" 300 25"/>
 
-        <TextBlock Text="З кроком" Margin=" 500 25 100 25"/>
+        <TextBlock Text="З кроком" 
+                   HorizontalAlignment="Right"
+                   Margin=" 400 25 290 105"/>
 
         <TextBox x:Name="FromTextBox"  Margin="55,50,0,50" HorizontalAlignment="Left" Width="140"/>
         <TextBox x:Name="ToTextBox" Margin="250 ,50,0,50" HorizontalAlignment="Left" Width="140"/>
@@ -28,7 +30,24 @@
 
         <Button Content="Треба більше кнопок!" Click="Button_Click" Margin="50" HorizontalAlignment="Right"/>
 
-        <WrapPanel x:Name="ButtonsPanel" Grid.Row="1" Margin="10"/>
+        <TextBlock Text="А чи не вилучити мені всі кнопки, кратні..." 
+                   HorizontalAlignment="Left" 
+                   VerticalAlignment="Bottom"
+                   Margin="100 10"/>
+
+        <TextBox x:Name="MultipleTextBox"
+                 HorizontalAlignment="Right"
+                 Margin="200 105 200 10"
+                 Width="140"/>
+
+        <Button Content=" Вилучити"
+                Margin="50 15"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Width="125"
+                Click="RemoveMultiples_Click" />
+
+        <WrapPanel x:Name="ButtonsPanel" Grid.Row="1" Margin="10" Background="#E4D9FF"/>
 
     </Grid>
 

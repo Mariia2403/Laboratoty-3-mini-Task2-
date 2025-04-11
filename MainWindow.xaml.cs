@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace WpfApp2
 {
@@ -13,10 +15,11 @@ namespace WpfApp2
         {
             InitializeComponent();
         }
+        private const int MAX_BUTTONS = 1000;
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            ButtonsPanel.Children.Clear();
+            //ButtonsPanel.Children.Clear();
 
             if (!int.TryParse(FromTextBox.Text, out int from) ||
                 !int.TryParse(ToTextBox.Text, out int to) ||
@@ -26,17 +29,29 @@ namespace WpfApp2
                 return;
             }
 
+            //  Перевірка ліміту перед обробкою
+            int count = ((to - from) / step) + 1;
+            if (count > MAX_BUTTONS)
+            {
+                MessageBox.Show($"Занадто багато чисел для обробки ({count}). Максимум: {MAX_BUTTONS}.\n" +
+                                $"Зменшіть діапазон або збільшіть крок.");
+                return;
+            }
+
             for (int i = from; i <= to; i += step)
             {
                 int number = i;
-                var (isPrime, explanation) = CheckPrimeWithReason(number);
+                var result = CheckPrimeWithReason(number);
+                bool isPrime = result.IsPrime;
+                string explanation = result.Explanation;
 
                 var btn = new ExplainedButton
                 {
                     Content = number.ToString(),
                     Explanation = explanation,
                     Margin = new Thickness(5),
-                    Padding = new Thickness(10, 5, 10, 5)
+                    Padding = new Thickness(10, 5, 10, 5),
+                    WasClicked = false
                 };
 
                 btn.Click += ExplainedButton_Click;
@@ -61,31 +76,85 @@ namespace WpfApp2
                   
                     message = btn.Explanation;
                     btn.WasClicked = true;
+
+                   
+                    btn.Background = new SolidColorBrush(Colors.Violet);
                 }
 
                 MessageBox.Show(message);
             }
         }
 
-        private (bool isPrime, string explanation) CheckPrimeWithReason(int number)
+        private PrimeCheckResult CheckPrimeWithReason(int number)
         {
             if (number < 2)
-                return (false, $"Число {number} не є простим (менше ніж 2)");
+                return new PrimeCheckResult
+                {
+                    IsPrime = false,
+                    Explanation = $"Число {number} не є простим (менше ніж 2)"
+                };
 
             if (number == 2)
-                return (true, $"Число {number} є простим (ділиться лише на 1 і {number})");
+                return new PrimeCheckResult
+                {
+                    IsPrime = true,
+                    Explanation = $"Число {number} є простим (ділиться лише на 1 і {number})"
+                };
 
             if (number % 2 == 0)
-                return (false, $"Число {number} складене, бо ділиться на 2");
+                return new PrimeCheckResult
+                {
+                    IsPrime = false,
+                    Explanation = $"Число {number} складене, бо ділиться на 2"
+                };
 
             int sqrt = (int)Math.Sqrt(number);
             for (int i = 3; i <= sqrt; i += 2)
             {
                 if (number % i == 0)
-                    return (false, $"Число {number} складене, бо ділиться на {i}");
+                    return new PrimeCheckResult
+                    {
+                        IsPrime = false,
+                        Explanation = $"Число {number} складене, бо ділиться на {i}"
+                    };
             }
 
-            return (true, $"Число {number} є простим, не ділиться ні на яке число, крім 1 і самого себе");
+            return new PrimeCheckResult
+            {
+                IsPrime = true,
+                Explanation = $"Число {number} є простим, не ділиться ні на яке число, крім 1 і самого себе"
+            };
+        }
+
+        private void RemoveMultiples_Click(object sender, RoutedEventArgs e)
+        {
+            if (!int.TryParse(MultipleTextBox.Text, out int multiple) || multiple == 0)
+            {
+                MessageBox.Show("Введіть коректне число (не нуль).");
+                return;
+            }
+
+            List<ExplainedButton> toRemove = new List<ExplainedButton>();
+
+            foreach (var child in ButtonsPanel.Children)
+            {
+                if (child is ExplainedButton btn &&
+                    int.TryParse(btn.Content.ToString(), out int value) &&
+                    value % multiple == 0)
+                {
+                    toRemove.Add(btn);
+                }
+            }
+
+            foreach (var btn in toRemove)
+            {
+                ButtonsPanel.Children.Remove(btn);
+            }
+
+            if (toRemove.Count == 0)
+            {
+                MessageBox.Show($"Жодної кнопки, кратної {multiple}, не знайдено.");
+            }
         }
     }
 }
